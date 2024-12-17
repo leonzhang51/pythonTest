@@ -1,6 +1,30 @@
 from fastapi import FastAPI
+from fastapi import HTTPException
+from pydantic import BaseModel #pydantic is a library for defining data models in Python, which allow you to validate and parse data.
 
+#items=["foo","bar","baz","qux", "quux", "corge", "grault", "garply", "waldo", "fred", "plugh", "xyzzy","thud"]
 app = FastAPI()
+
+class Item(BaseModel):
+    text:str=None
+    is_done:bool=False
+
+items=[]
+    
 @app.get("/")
 def root():
     return {"message": "Hello World"}
+
+@app.post("/items")
+def create_item(item: Item):
+    items.append(item)
+    return items
+@app.get("/items/{item_id}", response_model=Item) #response_model=Item means that the response will be a Item object
+def get_item(item_id: int)->Item:
+    if item_id>=len(items):
+        raise HTTPException(status_code=404, detail=f"Item not found")
+    return items[item_id]
+
+@app.get("/items", response_model=list[Item])
+def read_items(limit: int=10):
+    return items[0:limit]
