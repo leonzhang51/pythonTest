@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi import HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import (
     BaseModel,
 )  # pydantic is a library for defining data models in Python, which allow you to validate and parse data.
@@ -11,7 +12,15 @@ from src.route.route import router
 
 # # items=["foo","bar","baz","qux", "quux", "corge", "grault", "garply", "waldo", "fred", "plugh", "xyzzy","thud"]
 app = FastAPI()
+origins = ["*"]
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # class Item(BaseModel):
 #     text: str = None

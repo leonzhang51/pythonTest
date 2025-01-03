@@ -2,6 +2,8 @@ from pymongo import MongoClient
 from bson import json_util, ObjectId
 import json
 from .models import PersonModel, UpdatePersonModel, CreatePersonModel
+from fastapi.responses import JSONResponse
+from fastapi import HTTPException
 
 uri = "mongodb://localhost:27017/"
 db_name = "mydatabase"
@@ -92,7 +94,7 @@ def delete_person(person_id: str):
     try:
         db: MongoClient = connect_to_mongodb(uri, db_name)
         result = db.customers.delete_one({"_id": ObjectId(person_id)})
-
+        print("delete result", result)
         return result.deleted_count
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -110,17 +112,19 @@ def delete_all_people():
 
 
 def create_person(name: str, address: str):
-    try:
-        db: MongoClient = connect_to_mongodb(uri, db_name)
-        return_list = []
-        result = db.customers.insert_one({"name": name, "address": address})
-        for x in result:
-            x["_id"] = str(x["_id"])
-            return_list.append(x)
-        return list(return_list)
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
+
+    db: MongoClient = connect_to_mongodb(uri, db_name)
+    return_list = []
+    result = db.customers.insert_one({"name": name, "address": address})
+    print("data in existed collection is the", result.acknowledged)
+    if result.acknowledged:
+        # return JSONResponse(
+        #     status_code=201,
+        #     content={f"Person with name: {name} added"},
+        # )
+        return {f"Person with name: {name} added"}
+    else:
+        raise HTTPException(status_code=400, detail=f"Person {name} not created")
 
 
 def create_peopples(people: list):

@@ -33,8 +33,8 @@ async def get_person(name):
 @router.post("/", response_description="Add new person")
 async def add_person(request: Request):
     data = await request.json()
-    print("data in existed collection", data)
     person = create_person(data.get("name"), data.get("address"))
+    print("data in existed collection", person)
     return person
 
 
